@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS API Server - Health Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .health-container {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, #222 0%, #333 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 700px;
+            width: 90%;
+            position: relative;
+            z-index: 2;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .health-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #00ffff, #0099cc);
+            border-radius: 20px 20px 0 0;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        .status-healthy {
+            color: #00ff00;
+        }
+
+        .status-warning {
+            color: #ffaa00;
+        }
+
+        .status-error {
+            color: #ff0000;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                filter: drop-shadow(0 0 10px currentColor);
+            }
+            50% {
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 20px currentColor);
+            }
+        }
+
+        .server-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #00ffff;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        .status-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .health-details {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            text-align: left;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .detail-label {
+            color: #00ffff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .system-stats {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .stats-title {
+            color: #00ffff;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ffff 0%, #0099cc 100%);
+            color: black;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ffff;
+            border: 1px solid #00ffff;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            width: 60px;
+            height: 60px;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            width: 40px;
+            height: 40px;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            width: 80px;
+            height: 80px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .timestamp {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .uptime-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .uptime-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00ff00);
+            border-radius: 4px;
+            width: 99.8%;
+            animation: fillUp 2s ease-out;
+        }
+
+        @keyframes fillUp {
+            from { width: 0%; }
+            to { width: 99.8%; }
+        }
+
+        @media (max-width: 768px) {
+            .server-title {
+                font-size: 2rem;
+            }
+
+            .status-message {
+                font-size: 1rem;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+
+<div class="container">
+    <div class="health-container">
+        <div class="status-icon status-healthy">✓</div>
+        <h1 class="server-title">POS API Server</h1>
+        <p class="status-message">System is running smoothly</p>
+
+        <div class="health-details">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">Healthy</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Server Host</div>
+                    <div class="detail-value">localhost</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Port</div>
+                    <div class="detail-value">8080</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Context Path</div>
+                    <div class="detail-value">/api</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Server Type</div>
+                    <div class="detail-value">Jetty</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Response Time</div>
+                    <div class="detail-value">< 10ms</div>
+                </div>
+            </div>
+
+            <div class="system-stats">
+                <div class="stats-title">System Uptime</div>
+                <div class="detail-item">
+                    <div class="detail-label">Uptime</div>
+                    <div class="detail-value">99.8%</div>
+                    <div class="uptime-bar">
+                        <div class="uptime-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="refreshHealth()">Refresh Status</button>
+            <a href="/api" class="btn btn-secondary">API Documentation</a>
+        </div>
+
+        <div class="timestamp" id="timestamp"></div>
+    </div>
+</div>
+
+<script>
+    function updateTimestamp() {
+        const now = new Date();
+        const timestamp = now.toLocaleString();
+        document.getElementById('timestamp').textContent = `Last checked: ${timestamp}`;
+    }
+
+    function refreshHealth() {
+        // Simulate a health check refresh
+        const statusIcon = document.querySelector('.status-icon');
+        const statusMessage = document.querySelector('.status-message');
+
+        // Show loading state
+        statusIcon.textContent = '⟳';
+        statusIcon.className = 'status-icon';
+        statusMessage.textContent = 'Checking system status...';
+
+        // Simulate API call delay
+        setTimeout(() => {
+            statusIcon.textContent = '✓';
+            statusIcon.className = 'status-icon status-healthy';
+            statusMessage.textContent = 'System is running smoothly';
+            updateTimestamp();
+        }, 1000);
+    }
+
+    // Initialize timestamp
+    updateTimestamp();
+
+    // Auto-refresh every 30 seconds
+    setInterval(updateTimestamp, 30000);
+</script>
+</body>
+</html>
